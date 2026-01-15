@@ -1,0 +1,44 @@
+# Node.js dependencies for both client and server
+/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependency directories for client and server
+client/node_modules/
+server/node_modules/
+
+# Build directories for React (client-side)
+client/build/
+
+# React's env file (if any)
+client/.env
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Directory for storing temporary files
+*.temp
+*.bak
+
+# Vercel, Netlify, or other deployment directories
+.vercel/
+.netlify/
+
+# Editor/IDE-specific files
+.vscode/
+.idea/
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+
+# JetBrains IDE files
+*.iml
