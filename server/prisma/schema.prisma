@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+}
+
+model Organization {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  documents   Document[]
+}
+
+model Document {
+  id             String        @id @default(uuid())
+  organizationId String
+  title          String
+  sourceType     String
+  sourceUrl      String?
+  status         DocumentStatus @default(PENDING)
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks         Chunk[]
+}
+
+model Chunk {
+  id          String   @id @default(uuid())
+  documentId String
+  content     String
+  chunkIndex  Int
+  tokenCount  Int?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  @@unique([documentId, chunkIndex])
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
