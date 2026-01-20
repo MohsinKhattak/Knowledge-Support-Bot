@@ -41,10 +41,11 @@ model Chunk {
   tokenCount  Int?
   metadata    Json?
   createdAt   DateTime @default(now())
-
+  embedding   Float[]  // New column to store embeddings
   document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   @@unique([documentId, chunkIndex])
 }
+
 
 enum DocumentStatus {
   PENDING

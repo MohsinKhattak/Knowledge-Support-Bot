@@ -36,11 +36,9 @@ const fileFilter = (req, file, cb) => {
 
   console.log("File MIME type:", file.mimetype);
   
-  if (allowedMimes.includes(file.mimetype)) {
-    console.log("File accepted");
+  if (allowedMimes.includes(file.mimetype)) { 
     cb(null, true);
-  } else {
-    console.log("File rejected - invalid MIME type");
+  } else { 
     cb(new Error("Only PDF, DOC, DOCX, TXT, XLS, XLSX files are allowed"), false);
   }
 };

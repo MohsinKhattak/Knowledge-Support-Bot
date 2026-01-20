@@ -41,31 +41,17 @@ export const createDocument = async (req, res, next) => {
     });
 
     logger.info(`Document created: ${document.id}`);
- 
-    // Extract and chunk content asynchronously
+  
     extractDocumentContent(file.path, sourceType)
       .then(async (content) => {
-        console.log(`\n========== EXTRACTED CONTENT ==========`);
-        console.log(`Document ID: ${document.id}`);
-        console.log(`Title: ${title}`);
-        console.log(`Content length: ${content.text.length} characters`);
-        console.log(`Preview: ${content.text.substring(0, 300)}...`);
-        console.log(`========== END EXTRACTION ==========\n`);
-
-        // Create chunks from extracted content
+         
         const chunkResult = await createDocumentChunks(document.id, content.text);
-
-        // Update document status to READY
-        await DocumentRepo.updateStatus(document.id, "READY");
-
-        console.log(`Document ${document.id} processing complete!`);
+        await DocumentRepo.updateStatus(document.id, "READY"); 
         logger.info(`Document ${document.id} chunked successfully: ${chunkResult.chunkCount} chunks`);
       })
-      .catch((error) => { 
-        console.error(`\nError processing document ${document.id}: ${error.message}\n`);
+      .catch((error) => {  
         logger.error(`Error processing document ${document.id}: ${error.message}`);
-        
-        // Update document status to FAILED
+         
         DocumentRepo.updateStatus(document.id, "FAILED").catch(err => {
           logger.error(`Failed to update document status: ${err.message}`);
         });

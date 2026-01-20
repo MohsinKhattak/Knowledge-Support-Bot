@@ -4,8 +4,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const logsDir = path.join(__dirname, "../../logs");
-
-// Custom format for logs
+ 
 const customFormat = winston.format.combine(
   winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.errors({ stack: true }),
@@ -34,18 +33,15 @@ export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: customFormat,
   defaultMeta: { service: "knowledge-bot" },
-  transports: [
-    // Console transport - always show logs
+  transports: [ 
     new winston.transports.Console({
       format: consoleFormat,
-    }),
-    // Error logs
+    }), 
     new winston.transports.File({
       filename: path.join(logsDir, "error.log"),
       level: "error",
       format: customFormat,
-    }),
-    // All logs
+    }), 
     new winston.transports.File({
       filename: path.join(logsDir, "combined.log"),
       format: customFormat,
