@@ -1,5 +1,7 @@
 import { DocumentRepo } from "../repositories/document.repo.js"; 
 import { extractDocumentContent } from "../services/document/extract.service.js"; 
+import { createDocumentChunks } from "../services/document/chunk.service.js";
+import { logger } from "../config/logger.js";
 
 export const createDocument = async (req, res, next) => {
   try {
@@ -37,23 +39,45 @@ export const createDocument = async (req, res, next) => {
       metadata: metadata ? JSON.parse(metadata) : {},
       status: "PENDING",
     });
+
+    logger.info(`Document created: ${document.id}`);
  
- 
+    // Extract and chunk content asynchronously
     extractDocumentContent(file.path, sourceType)
-      .then((content) => {
-        console.log(`Extracted content for document ID  :`, content);
-         
+      .then(async (content) => {
+        console.log(`\n========== EXTRACTED CONTENT ==========`);
+        console.log(`Document ID: ${document.id}`);
+        console.log(`Title: ${title}`);
+        console.log(`Content length: ${content.text.length} characters`);
+        console.log(`Preview: ${content.text.substring(0, 300)}...`);
+        console.log(`========== END EXTRACTION ==========\n`);
+
+        // Create chunks from extracted content
+        const chunkResult = await createDocumentChunks(document.id, content.text);
+
+        // Update document status to READY
+        await DocumentRepo.updateStatus(document.id, "READY");
+
+        console.log(`Document ${document.id} processing complete!`);
+        logger.info(`Document ${document.id} chunked successfully: ${chunkResult.chunkCount} chunks`);
       })
       .catch((error) => { 
-        console.log(`Error extracting content for document ID  : ${error.message}`);
+        console.error(`\nError processing document ${document.id}: ${error.message}\n`);
+        logger.error(`Error processing document ${document.id}: ${error.message}`);
+        
+        // Update document status to FAILED
+        DocumentRepo.updateStatus(document.id, "FAILED").catch(err => {
+          logger.error(`Failed to update document status: ${err.message}`);
+        });
       });
 
     res.status(201).json({
       success: true,
-      message: "Document created successfully",
+      message: "Document created successfully. Processing started...",
       data: document,
     });
   } catch (error) {  
+    logger.error(`Error creating document: ${error.message}`);
     next(error);
   }
 };
