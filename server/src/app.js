@@ -7,10 +7,20 @@ import { env } from "./config/env.js";
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+ 
+app.use((req, res, next) => {
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    return next();
+  }
+  express.json()(req, res, next);
+});
+
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/documents",documentApis );
-app.use("/api/organizations",organizationApis);
+
+// Mount routes
+app.use("/api/documents", documentApis);
+app.use("/api/organizations", organizationApis);
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -18,7 +28,5 @@ app.get("/health", (req, res) => {
     env: env.NODE_ENV,
   });
 });
-
-
 
 export default app;

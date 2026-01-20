@@ -1,8 +1,8 @@
 import express from "express"
-const router=express.Router();
+const router = express.Router();
 import { createDocument } from '../controllers/document.controller.js';
+import { upload } from '../config/multer.js';
 
-
-router.post("/", createDocument);
+router.post("/", upload.single("file"), createDocument);
 
 export default router;

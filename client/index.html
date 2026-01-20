@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload - Knowledge Support Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 30px;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #f8f9ff;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .file-input-label input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .response.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .response h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .response pre {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info {
+            font-size: 13px;
+            color: #999;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 Upload Document</h1>
+
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="organizationId">Organization ID</label>
+                <input 
+                    type="text" 
+                    id="organizationId" 
+                    name="organizationId" 
+                    placeholder="Enter organization ID"
+                    required
+                >
+                <p class="info">Example: 071e9523-850b-4d22-ba43-4343da481fd8</p>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Document Title</label>
+                <input 
+                    type="text" 
+                    id="title" 
+                    name="title" 
+                    placeholder="Enter document title"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="file">Document File</label>
+                <div class="file-input-label" id="fileLabel">
+                    <div>
+                        <p style="margin-bottom: 5px; font-weight: 600; color: #667eea;">📁 Click to upload</p>
+                        <p style="font-size: 12px; color: #999;">or drag and drop</p>
+                    </div>
+                    <input 
+                        type="file" 
+                        id="file" 
+                        name="file" 
+                        accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                        required
+                    >
+                </div>
+                <div id="fileName" class="file-name"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="metadata">Metadata (JSON)</label>
+                <textarea 
+                    id="metadata" 
+                    name="metadata" 
+                    placeholder='{"category": "finance", "department": "HR"}'
+                ></textarea>
+                <p class="info">Optional: JSON metadata for the document</p>
+            </div>
+
+            <button type="submit" class="btn btn-submit">Upload Document</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Uploading...</p>
+            </div>
+        </form>
+
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.getElementById('fileLabel');
+        const fileName = document.getElementById('fileName');
+        const loading = document.getElementById('loading');
+        const responseDiv = document.getElementById('response');
+
+        // Handle file input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = `Selected: ${e.target.files[0].name}`;
+            }
+        });
+
+        // Handle drag and drop
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#764ba2';
+            fileLabel.style.background = '#f0f2ff';
+        });
+
+        fileLabel.addEventListener('dragleave', () => {
+            fileLabel.style.borderColor = '#667eea';
+            fileLabel.style.background = '#f8f9ff';
+        });
+
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#667eea';
+            fileLabel.style.background = '#f8f9ff';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileName.textContent = `Selected: ${files[0].name}`;
+            }
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const organizationId = document.getElementById('organizationId').value;
+            const title = document.getElementById('title').value;
+            const file = fileInput.files[0];
+            const metadata = document.getElementById('metadata').value;
+
+            if (!file) {
+                showResponse('error', 'Error', 'Please select a file');
+                return;
+            }
+
+            loading.style.display = 'block';
+            responseDiv.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                formData.append('organizationId', organizationId);
+                formData.append('title', title);
+                formData.append('file', file);
+                if (metadata.trim()) {
+                    formData.append('metadata', metadata);
+                }
+
+                const response = await fetch('http://localhost:3000/api/documents', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse('success', 'Success!', `Document uploaded successfully!\n\n${JSON.stringify(data.data, null, 2)}`);
+                    form.reset();
+                    fileName.textContent = '';
+                } else {
+                    showResponse('error', 'Error', data.error || 'Failed to upload document');
+                }
+            } catch (error) {
+                showResponse('error', 'Error', error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        function showResponse(type, title, message) {
+            responseDiv.className = `response ${type}`;
+            responseDiv.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${message}</pre>
+            `;
+            responseDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
